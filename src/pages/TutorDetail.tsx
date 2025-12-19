@@ -9,10 +9,7 @@ import {
 } from '@/features/tutors/tutorsSelectors';
 import { toggleFavorite } from '@/features/favorites/favoritesSlice';
 import { selectIsFavorite } from '@/features/favorites/favoritesSelectors';
-import {
-  selectIsAuthenticated,
-  selectUser,
-} from '@/features/auth/authSelectors';
+import { selectIsAuthenticated, selectUser } from '@/features/auth/authSelectors';
 import { createConversation } from '@/features/chat/chatSlice';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
@@ -36,9 +33,7 @@ export const TutorDetail: React.FC = () => {
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [chatConversationId, setChatConversationId] = useState<number | null>(
-    null
-  );
+  const [chatConversationId, setChatConversationId] = useState<number | null>(null);
 
   const [requestForm, setRequestForm] = useState({
     name: '',
@@ -103,16 +98,16 @@ export const TutorDetail: React.FC = () => {
     }
   };
 
+  // ✅ без e и без Promise наружу
   const handleSubmitRequest = async () => {
     setIsSubmitting(true);
 
-    // Симуляция отправки запроса
+    // симуляция отправки
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     setIsSubmitting(false);
     setRequestSubmitted(true);
 
-    // Закрываем модальное окно через 3 секунды
     setTimeout(() => {
       handleCloseRequestModal();
     }, 3000);
@@ -145,6 +140,9 @@ export const TutorDetail: React.FC = () => {
     );
   }
 
+  const canSubmit =
+    !!requestForm.name && !!requestForm.goal && !!requestForm.level && !isSubmitting;
+
   return (
     <div className={styles.tutorDetail}>
       <div className={styles.container}>
@@ -176,16 +174,12 @@ export const TutorDetail: React.FC = () => {
                 {tutor.first_name} {tutor.last_name}
               </h1>
 
-              {tutor.faculty && (
-                <p className={styles.faculty}>{tutor.faculty}</p>
-              )}
+              {tutor.faculty && <p className={styles.faculty}>{tutor.faculty}</p>}
 
               <div className={styles.stats}>
                 <div className={styles.stat}>
                   <span className={styles.statIcon}>⭐</span>
-                  <span className={styles.statValue}>
-                    {tutor.avg_rating.toFixed(1)}
-                  </span>
+                  <span className={styles.statValue}>{tutor.avg_rating.toFixed(1)}</span>
                   <span className={styles.statLabel}>
                     ({tutor.reviews_count} отзывов)
                   </span>
@@ -193,17 +187,13 @@ export const TutorDetail: React.FC = () => {
 
                 <div className={styles.stat}>
                   <span className={styles.statIcon}>💼</span>
-                  <span className={styles.statValue}>
-                    {tutor.experience_years}
-                  </span>
+                  <span className={styles.statValue}>{tutor.experience_years}</span>
                   <span className={styles.statLabel}>лет опыта</span>
                 </div>
 
                 <div className={styles.stat}>
                   <span className={styles.statIcon}>💰</span>
-                  <span className={styles.statValue}>
-                    {tutor.price_per_hour} ₽
-                  </span>
+                  <span className={styles.statValue}>{tutor.price_per_hour} ₽</span>
                   <span className={styles.statLabel}>/час</span>
                 </div>
               </div>
@@ -276,6 +266,7 @@ export const TutorDetail: React.FC = () => {
         </Card>
       </div>
 
+      {/* Request Modal */}
       <Modal
         isOpen={isRequestModalOpen}
         onClose={handleCloseRequestModal}
@@ -289,14 +280,8 @@ export const TutorDetail: React.FC = () => {
 
               <Button
                 variant="primary"
-                type="submit"
-                form="requestForm"
-                disabled={
-                  isSubmitting ||
-                  !requestForm.name ||
-                  !requestForm.goal ||
-                  !requestForm.level
-                }
+                onClick={() => void handleSubmitRequest()}
+                disabled={!canSubmit}
               >
                 {isSubmitting ? 'Отправка...' : 'Отправить заявку'}
               </Button>
@@ -306,10 +291,10 @@ export const TutorDetail: React.FC = () => {
       >
         {!requestSubmitted ? (
           <form
-            id="requestForm"
             className={styles.requestForm}
             onSubmit={(e) => {
               e.preventDefault();
+              if (!canSubmit) return;
               void handleSubmitRequest();
             }}
           >
@@ -324,9 +309,7 @@ export const TutorDetail: React.FC = () => {
               label="Ваше имя"
               type="text"
               value={requestForm.name}
-              onChange={(e) =>
-                setRequestForm({ ...requestForm, name: e.target.value })
-              }
+              onChange={(e) => setRequestForm({ ...requestForm, name: e.target.value })}
               placeholder="Например: Иван"
               required
             />
@@ -335,9 +318,7 @@ export const TutorDetail: React.FC = () => {
               label="Цель обучения"
               type="text"
               value={requestForm.goal}
-              onChange={(e) =>
-                setRequestForm({ ...requestForm, goal: e.target.value })
-              }
+              onChange={(e) => setRequestForm({ ...requestForm, goal: e.target.value })}
               placeholder="Например: Подготовка к ЕГЭ по математике"
               required
             />
@@ -346,9 +327,7 @@ export const TutorDetail: React.FC = () => {
               label="Ваш уровень"
               type="text"
               value={requestForm.level}
-              onChange={(e) =>
-                setRequestForm({ ...requestForm, level: e.target.value })
-              }
+              onChange={(e) => setRequestForm({ ...requestForm, level: e.target.value })}
               placeholder="Например: 11 класс, решаю базовые задачи"
               required
             />
