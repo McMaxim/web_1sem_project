@@ -95,17 +95,14 @@ export const TutorDetail: React.FC = () => {
     }
   };
 
-  const handleSubmitRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitRequest = async () => {
     setIsSubmitting(true);
-
-    // Симуляция отправки запроса
+  
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
+  
     setIsSubmitting(false);
     setRequestSubmitted(true);
-
-    // Закрываем модальное окно через 3 секунды
+  
     setTimeout(() => {
       handleCloseRequestModal();
     }, 3000);
