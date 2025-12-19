@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import {
-  fetchTutorById,
-  clearCurrentTutor,
-} from '@/features/tutors/tutorsSlice';
+import { fetchTutorById, clearCurrentTutor } from '@/features/tutors/tutorsSlice';
 import {
   selectCurrentTutor,
   selectTutorsStatus,
@@ -12,7 +9,10 @@ import {
 } from '@/features/tutors/tutorsSelectors';
 import { toggleFavorite } from '@/features/favorites/favoritesSlice';
 import { selectIsFavorite } from '@/features/favorites/favoritesSelectors';
-import { selectIsAuthenticated, selectUser } from '@/features/auth/authSelectors';
+import {
+  selectIsAuthenticated,
+  selectUser,
+} from '@/features/auth/authSelectors';
 import { createConversation } from '@/features/chat/chatSlice';
 import { Button } from '@/components/Button/Button';
 import { Card } from '@/components/Card/Card';
@@ -25,17 +25,21 @@ export const TutorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
   const tutor = useAppSelector(selectCurrentTutor);
   const status = useAppSelector(selectTutorsStatus);
   const error = useAppSelector(selectTutorsError);
-  const isFavorite = useAppSelector(selectIsFavorite(tutor?.id ?? -1));
 
+  const isFavorite = useAppSelector(selectIsFavorite(tutor?.id ?? -1));
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
-  const [chatConversationId, setChatConversationId] = useState<number | null>(null);
+  const [chatConversationId, setChatConversationId] = useState<number | null>(
+    null
+  );
+
   const [requestForm, setRequestForm] = useState({
     name: '',
     goal: '',
@@ -43,6 +47,7 @@ export const TutorDetail: React.FC = () => {
     experience: '',
     message: '',
   });
+
   const [requestSubmitted, setRequestSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,8 +65,7 @@ export const TutorDetail: React.FC = () => {
     setRequestSubmitted(false);
   };
 
-  const handleCloseRequestModal = () => {
-    setIsRequestModalOpen(false);
+  const resetRequestForm = () => {
     setRequestForm({
       name: '',
       goal: '',
@@ -69,6 +73,11 @@ export const TutorDetail: React.FC = () => {
       experience: '',
       message: '',
     });
+  };
+
+  const handleCloseRequestModal = () => {
+    setIsRequestModalOpen(false);
+    resetRequestForm();
   };
 
   const handleOpenChat = async () => {
@@ -79,7 +88,6 @@ export const TutorDetail: React.FC = () => {
 
     if (!user || !tutor) return;
 
-    // Создаем новую беседу
     const result = await dispatch(
       createConversation({
         tutorId: tutor.id,
@@ -97,12 +105,14 @@ export const TutorDetail: React.FC = () => {
 
   const handleSubmitRequest = async () => {
     setIsSubmitting(true);
-  
+
+    // Симуляция отправки запроса
     await new Promise((resolve) => setTimeout(resolve, 1000));
-  
+
     setIsSubmitting(false);
     setRequestSubmitted(true);
-  
+
+    // Закрываем модальное окно через 3 секунды
     setTimeout(() => {
       handleCloseRequestModal();
     }, 3000);
@@ -160,13 +170,16 @@ export const TutorDetail: React.FC = () => {
                 {tutor.last_name[0]}
               </div>
             )}
+
             <div className={styles.headerInfo}>
               <h1 className={styles.name}>
                 {tutor.first_name} {tutor.last_name}
               </h1>
+
               {tutor.faculty && (
                 <p className={styles.faculty}>{tutor.faculty}</p>
               )}
+
               <div className={styles.stats}>
                 <div className={styles.stat}>
                   <span className={styles.statIcon}>⭐</span>
@@ -177,6 +190,7 @@ export const TutorDetail: React.FC = () => {
                     ({tutor.reviews_count} отзывов)
                   </span>
                 </div>
+
                 <div className={styles.stat}>
                   <span className={styles.statIcon}>💼</span>
                   <span className={styles.statValue}>
@@ -184,6 +198,7 @@ export const TutorDetail: React.FC = () => {
                   </span>
                   <span className={styles.statLabel}>лет опыта</span>
                 </div>
+
                 <div className={styles.stat}>
                   <span className={styles.statIcon}>💰</span>
                   <span className={styles.statValue}>
@@ -242,20 +257,14 @@ export const TutorDetail: React.FC = () => {
           </div>
 
           <div className={styles.actions}>
-            <Button
-              variant="primary"
-              size="large"
-              onClick={handleOpenRequestModal}
-            >
+            <Button variant="primary" size="large" onClick={handleOpenRequestModal}>
               📨 Отправить заявку
             </Button>
-            <Button
-              variant="primary"
-              size="large"
-              onClick={handleOpenChat}
-            >
+
+            <Button variant="primary" size="large" onClick={handleOpenChat}>
               💬 Написать сообщение
             </Button>
+
             <Button
               variant="secondary"
               size="large"
@@ -277,9 +286,11 @@ export const TutorDetail: React.FC = () => {
               <Button variant="secondary" onClick={handleCloseRequestModal}>
                 Отмена
               </Button>
+
               <Button
                 variant="primary"
-                onClick={(e) => handleSubmitRequest(e as any)}
+                type="submit"
+                form="requestForm"
                 disabled={
                   isSubmitting ||
                   !requestForm.name ||
@@ -294,7 +305,14 @@ export const TutorDetail: React.FC = () => {
         }
       >
         {!requestSubmitted ? (
-          <form onSubmit={handleSubmitRequest} className={styles.requestForm}>
+          <form
+            id="requestForm"
+            className={styles.requestForm}
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleSubmitRequest();
+            }}
+          >
             <div className={styles.formInfo}>
               <p className={styles.formDescription}>
                 Расскажите о себе и ваших целях обучения. Репетитор получит вашу
@@ -368,8 +386,7 @@ export const TutorDetail: React.FC = () => {
             </p>
             <div className={styles.successDetails}>
               <p>
-                <strong>Репетитор:</strong> {tutor.first_name}{' '}
-                {tutor.last_name}
+                <strong>Репетитор:</strong> {tutor.first_name} {tutor.last_name}
               </p>
               <p>
                 <strong>Ваше имя:</strong> {requestForm.name}
@@ -382,6 +399,7 @@ export const TutorDetail: React.FC = () => {
         )}
       </Modal>
 
+      {/* Chat Modal */}
       <Modal
         isOpen={isChatModalOpen}
         onClose={() => setIsChatModalOpen(false)}
