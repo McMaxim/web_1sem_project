@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
   resolve: {
@@ -10,6 +9,6 @@ export default defineConfig(({ mode }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // Use '/' for development and '/max/' for production (GitHub Pages)
-  base: mode === 'production' ? '/max/' : '/',
+  // для GitHub Pages: https://mcmaxim.github.io/web_1sem_project/
+  base: mode === 'production' ? '/web_1sem_project/' : '/',
 }));
